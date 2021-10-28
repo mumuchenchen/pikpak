@@ -31,7 +31,7 @@ jobs:
         env:
           CF_DOMAIN: ${{ secrets.CF_DOMAIN }} # CF-Workers域名
         run: |
-          sed -i "s/cors.z7.workers.dev/$CF_DOMAIN/g" src/utils/axios.ts
+          [ $CF_DOMAIN ] && sed -i "s/cors.z7.workers.dev/$CF_DOMAIN/g" src/utils/axios.ts
           npm install
           npm run build
           
