@@ -12,6 +12,7 @@
     "dplayer": "^1.26.0",
     "element-resize-detector": "^1.2.3",
     "plyr": "^3.6.9",
+    "qs": "^6.10.1",
     "streamsaver": "^2.0.5",
     "vue": "^3.2.16",
     "vue-router": "^4.0.12"
@@ -19,6 +20,7 @@
   "devDependencies": {
     "@types/dplayer": "^1.25.2",
     "@types/element-resize-detector": "^1.1.3",
+    "@types/qs": "^6.9.7",
     "@types/streamsaver": "^2.0.1",
     "@types/video.js": "^7.3.27",
     "@vicons/tabler": "^0.11.0",

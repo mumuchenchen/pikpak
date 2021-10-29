@@ -62,7 +62,7 @@ instance.interceptors.response.use(response => {
         }
         
         break;
-      case 400:
+      case 400:  case 403:
         window.$message.error(response.data.error_description || '出错了')
       default:
         break;
@@ -72,4 +72,18 @@ instance.interceptors.response.use(response => {
   return Promise.reject(error)
 })
 
+const instance2 = axios.create({})
+instance2.interceptors.request.use(request => {
+  request.headers = {
+    Authorization: 'Bearer secret_FErDcv3kgsFNLiWUDOWYdJhNqOIKj55eteBg3vIoiLt',
+    'Notion-Version': '2021-08-16',
+    'Content-Type': 'application/json'
+  }
+  if(request.url?.indexOf('https://cors.z7.workers.dev') === -1) {
+    request.url = 'https://cors.z7.workers.dev/' + request.url
+  }
+  return request
+})
+
+export const notionHttp = instance2
 export default instance

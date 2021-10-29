@@ -79,7 +79,7 @@
 import { ref } from '@vue/reactivity';
 import { h, onMounted, watch } from '@vue/runtime-core';
 import { NLayout, NLayoutSider, NLayoutContent, NMenu, MenuOption, NIcon, NProgress, NText, NModal, NCard, NInput, NButton, NScrollbar, NTime, NTooltip, useDialog } from 'naive-ui'
-import { File, Trash, CircleX, Logout, Settings } from '@vicons/tabler'
+import { File, Trash, CircleX, Logout, Settings, Share } from '@vicons/tabler'
 import http from '../../utils/axios'
 import { byteConvert } from '../../utils'
 import { useRoute, useRouter } from 'vue-router';
@@ -100,17 +100,22 @@ import { useRoute, useRouter } from 'vue-router';
       key: 'trash',
       icon: renderIcon(Trash)
     },
-    
     {
       label: '设置',
       key: 'setting',
       icon: renderIcon(Settings)
     },
+    {
+      label: '资源库',
+      key: 'share',
+      icon: renderIcon(Share)
+    }
   ])
   const userInfo = ref()
   const getUserInfo = () => {
     http.get('https://user.mypikpak.com/v1/user/me')
       .then(res => {
+        window.localStorage.setItem('pikpakUser', JSON.stringify(res.data))
         userInfo.value = res.data
       })
       .catch(error => {
@@ -283,5 +288,14 @@ import { useRoute, useRouter } from 'vue-router';
   .bottom-user-info .action{
     font-size: 18px;
     cursor: pointer;
+  }
+
+  .list-page {
+    padding: 40px;
+  }
+  @media(max-width: 968px) {
+    .list-page {
+      padding: 10px;
+    }
   }
 </style>

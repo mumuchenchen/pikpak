@@ -11,10 +11,18 @@
           </n-breadcrumb-item>
         </n-breadcrumb>
       </div>
-      <div class="action" @click="showAddUrl = true">
-        <n-icon :color="themeVars.primaryColor">
-          <circle-plus></circle-plus>
-        </n-icon>
+      <div class="action">
+        <n-space>
+          <n-button type="default" @click="movePost" v-if="moveFiles?.length">
+            粘贴已剪切{{moveFiles.length}}项资源
+          </n-button>
+          <n-button v-if="copyFiles?.length" @click="copyPost">
+            粘贴已复制{{copyFiles.length}}项资源
+          </n-button>
+          <n-icon :color="themeVars.primaryColor"  @click="showAddUrl = true">
+            <circle-plus></circle-plus>
+          </n-icon>
+        </n-space>
       </div>
     </div>
     <n-scrollbar style="max-height: calc(100vh - 190px);" @scroll="scrollHandle">
@@ -26,6 +34,26 @@
     <task-vue ref="taskRef"></task-vue>
     <div class="outer-wrapper static show" v-if="checkedRowKeys.length">
       <div class="toolbar-wrapper">
+        <div class="toolbar-item" @click="batchCopyAll">
+          <n-tooltip>
+            <template #trigger>
+              <n-icon>
+                <icon-copy></icon-copy>
+              </n-icon>
+            </template>
+            复制所选
+          </n-tooltip>
+        </div>
+        <div class="toolbar-item" @click="batchMoveAll">
+          <n-tooltip>
+            <template #trigger>
+              <n-icon>
+                <switch-horizontal></switch-horizontal>
+              </n-icon>
+            </template>
+            剪切所选
+          </n-tooltip>
+        </div>
         <div class="toolbar-item" @click="copyAll">
           <n-tooltip>
             <template #trigger>
@@ -87,16 +115,32 @@
         </div>
       </n-card>
     </n-modal>
+    
+    <n-modal v-model:show="showName">
+      <n-card style="width: 600px;" title="修改名称">
+        <template #header-extra>
+          <n-icon @click="showName = false">
+            <circle-x></circle-x>
+          </n-icon>
+        </template>
+        <template v-if="newName">
+          <n-input :placeholder="newName.value" v-model:value="newName.value"></n-input>
+        </template>
+        <template #action>
+          <n-button :block="true" type="primary" :disabled="!newName || !newName.value" @click="namePost">重命名</n-button>
+        </template>
+      </n-card>
+    </n-modal>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from '@vue/reactivity';
 import { h, computed, onMounted, watch } from '@vue/runtime-core'
-import http from '../utils/axios'
+import http, { notionHttp } from '../utils/axios'
 import { useRoute, useRouter } from 'vue-router'
-import { DataTableColumns, NDataTable, NTime, NEllipsis, NModal, NCard, NInput, NBreadcrumb, NBreadcrumbItem, NIcon, useThemeVars, NButton, NText, NPopconfirm, NTooltip, NSpace, NScrollbar, NSpin, NDropdown, useDialog } from 'naive-ui'
-import { CirclePlus, CircleX, Dots, Share } from '@vicons/tabler'
+import { DataTableColumns, NDataTable, NTime, NEllipsis, NModal, NCard, NInput, NBreadcrumb, NBreadcrumbItem, NIcon, useThemeVars, NButton, NTooltip, NSpace, NScrollbar, NSpin, NDropdown, useDialog, } from 'naive-ui'
+import { CirclePlus, CircleX, Dots, Share, Copy as IconCopy, SwitchHorizontal } from '@vicons/tabler'
 import { byteConvert } from '../utils'
 import PlyrVue from '../components/Plyr.vue'
 import TaskVue from '../components/Task.vue'
@@ -200,6 +244,18 @@ import streamSaver from 'streamsaver'
         placement: 'bottom-end',
         options: [
           {
+            label: '重命名',
+            key: 'name',
+          },
+          {
+            label: '复制',
+            key: 'batchCopy',
+          },
+          {
+            label: '剪切',
+            key: 'batchMove',
+          },
+          {
             label: '直接下载',
             key: 'down',
             disabled: row.size <= 0
@@ -215,9 +271,19 @@ import streamSaver from 'streamsaver'
             disabled: row.size <= 0 || !aria2Data.value || !aria2Data.value.host
           },
           {
-            label: '分享秒传',
+            label: '复制秒传',
+            key: 'code',
+            disabled: !row.hash
+          },
+          {
+            label: '设为默认目录',
+            key: 'base',
+            disabled: row.kind !== 'drive#folder'
+          },
+          {
+            label: '分享到资源库',
             key: 'share',
-            disabled: row.size <= 0
+            disabled: !row.hash
           },
           {
             label: '删除',
@@ -226,6 +292,15 @@ import streamSaver from 'streamsaver'
         ],
         onSelect: (key) => {
           switch (key) {
+            case 'name':
+              nameModelSHow(row)
+                break
+            case 'batchCopy':
+              batchCopy([row.id])
+              break
+            case 'batchMove':
+              batchMove([row.id])
+              break
             case 'down':
               downFile(row.id)
               break
@@ -241,8 +316,14 @@ import streamSaver from 'streamsaver'
                   aria2Post(res)
                 })
               break
-            case 'share':
+            case 'code':
               copy(`PikPak://${row.name}|${row.size}|${row.hash}`)
+              break
+            case 'base':
+              window.localStorage.setItem('pikpakUploadFolder', JSON.stringify(row))
+              break
+            case 'share':
+              shareUrl(row)
               break
             case 'delete': 
               dialog.warning({
@@ -297,7 +378,10 @@ import streamSaver from 'streamsaver'
       })
   }
   const initPage = () => {
+    moveFiles.value = JSON.parse(window.localStorage.getItem('pikpakMoveFiles') || '[]')
+    copyFiles.value = JSON.parse(window.localStorage.getItem('pikpakCopyFiles') || '[]')
     filesList.value = []
+    checkedRowKeys.value = []
     getFileList()
     parentInfo.value = {}
     if(route.params.id) {
@@ -404,6 +488,7 @@ import streamSaver from 'streamsaver'
             folder_type: "DOWNLOAD"
           }
         }
+        // {"kind":"drive#folder","parent_id":"VMn5GV_X98Vj4ZiQZQ8hKo6Ho1","name":"1-2"}
         showAddUrl.value = false
         http.post('https://api-drive.mypikpak.com/drive/v1/files', postData)
           .then((res:any) => {
@@ -535,7 +620,152 @@ import streamSaver from 'streamsaver'
       }
     }
   }
-
+  const shareUrl = (row: any) => {
+    let pikpakUrl = `PikPak://${row.name}|${row.size}|${row.hash}`
+    const user = JSON.parse(window.localStorage.getItem('pikpakUser') || '{}')
+    notionHttp.post('https://cors.z7.workers.dev/https://api.notion.com/v1/pages', {
+      parent: {
+        database_id: 'f90e8e28b55e423185f44c89c53c573c',
+      },
+      properties: {
+        '分类': {
+          select: {
+            name: '来自PikPak网页'
+          }
+        },
+        '标签': {
+          select: {
+            name: '其他'
+          }
+        },
+        '发布人': {
+          rich_text: [
+            {
+              text: {
+                content: user.name || ''
+              }
+            }
+          ]
+        },
+        '名称': {
+          title: [{
+            text: {
+              content: row.name
+            }
+          }]
+        },
+        '链接': {
+          rich_text: [
+            {
+              text: {
+                content: pikpakUrl
+              }
+            }
+          ]
+        },
+        '大小': {
+          rich_text: [
+            {
+              text: {
+                content: byteConvert(row.size)
+              }
+            }
+          ]
+        }
+      }
+    })
+      .then(res => {
+        console.log(res)
+        window.$message.success('分享成功')
+      })
+      .catch(error => {
+        console.log(error.response.config.data)
+      }) 
+  }
+  
+  const batchMoveAll = (items:object) => {
+    let text:string[] = []
+    filesList.value.forEach((item:FileInfo) => {
+      if(checkedRowKeys.value.indexOf(item.id) !== -1) {
+       text.push(item.id)
+      }
+    })
+    batchMove(text)
+  }
+  const batchCopyAll = (items:object) => {
+    let text:string[] = []
+    filesList.value.forEach((item:FileInfo) => {
+      if(checkedRowKeys.value.indexOf(item.id) !== -1) {
+       text.push(item.id)
+      }
+    })
+    batchCopy(text)
+  }
+  const moveFiles = ref()
+  const batchMove = (items:object) => {
+    moveFiles.value = items
+    window.localStorage.setItem('pikpakMoveFiles', JSON.stringify(items))
+    window.$message.success('剪切成功，请点击页面右上方粘贴按钮')
+  }
+  const copyFiles = ref()
+  const batchCopy = (items:object) => {
+    copyFiles.value = items
+    window.localStorage.setItem('pikpakCopyFiles', JSON.stringify(items))
+    window.$message.success('复制成功，请点击页面右上方粘贴按钮')
+  }
+  const movePost = () => {
+    http.post('https://api-drive.mypikpak.com/drive/v1/files:batchMove',{
+      "to":{
+        "parent_id": route.params.id || ''
+      },
+      "ids": moveFiles.value
+    })
+      .then(res => {
+        pageToken.value = ''
+        getFileList()
+        window.$message.success('剪切成功')
+        moveFiles.value = []
+        window.localStorage.removeItem('pikpakMoveFiles')
+      })
+  }
+  const copyPost = () => {
+    http.post('https://api-drive.mypikpak.com/drive/v1/files:batchCopy',{
+      "to":{
+        "parent_id": route.params.id || ''
+      },
+      "ids": copyFiles.value
+    })
+      .then(res => {
+        pageToken.value = ''
+        getFileList()
+        window.$message.success('复制成功')
+        copyFiles.value = []
+        window.localStorage.removeItem('pikpakCopyFiles')
+      })
+  }
+  const nameModelSHow = (row:any) => {
+    newName.value = {
+      id: row.id,
+      value: row.name
+    }
+    showName.value = true
+  }
+  const showName = ref(false)
+  const newName = ref<{
+    id: string,
+    value: string
+  } | null>()
+  const namePost = () => [
+    http.patch('https://api-drive.mypikpak.com/drive/v1/files/' + newName.value?.id, {
+      name: newName.value?.value
+    })
+      .then(() => {
+        getFileList()
+        window.$message.success('修改成功')
+        newName.value = null
+        showName.value = false
+      })
+  ]
 </script>
 
 <style>

@@ -22,6 +22,11 @@ const routes: Array<RouteRecordRaw> = [
         name: 'setting',
         component: () => import('../views/setting.vue')
       },
+      {
+        path: 'share',
+        name: 'share',
+        component: () => import('../views/share.vue')
+      }
     ]
   },
   {
