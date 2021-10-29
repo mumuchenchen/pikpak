@@ -16,7 +16,7 @@ async function handleRequest(event) {
       outBody, outStatus = 200, outStatusText = 'OK', outCt = null, outHeaders = new Headers({
           "Access-Control-Allow-Origin": reqHeaders.get('Origin'),
           "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
-          "Access-Control-Allow-Headers": reqHeaders.get('Access-Control-Allow-Headers') || "Accept, Authorization, Cache-Control, Content-Type, DNT, If-Modified-Since, Keep-Alive, Origin, User-Agent, X-Requested-With, Token, x-access-token"
+          "Access-Control-Allow-Headers": reqHeaders.get('Access-Control-Allow-Headers') || "Accept, Authorization, Cache-Control, Content-Type, DNT, If-Modified-Since, Keep-Alive, Origin, User-Agent, X-Requested-With, Token, x-access-token, Notion-Version"
       });
 
   try {
@@ -51,16 +51,17 @@ async function handleRequest(event) {
           //保留头部其它信息
           let he = reqHeaders.entries();
           for (let h of he) {
-              if (!['content-length', 'content-type'].includes(h[0])) {
+              if (!['content-length'].includes(h[0])) {
                   fp.headers[h[0]] = h[1];
               }
           }
-
           // 是否带 body
           if (["POST", "PUT", "PATCH", "DELETE"].indexOf(request.method) >= 0) {
               const ct = (reqHeaders.get('content-type') || "").toLowerCase();
               if (ct.includes('application/json')) {
-                  fp.body = JSON.stringify(await request.json());
+                    let requestJSON = await request.json()
+                    console.log(typeof requestJSON)
+                  fp.body = JSON.stringify(requestJSON);
               } else if (ct.includes('application/text') || ct.includes('text/html')) {
                   fp.body = await request.text();
               } else if (ct.includes('form')) {

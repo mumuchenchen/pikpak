@@ -87,7 +87,7 @@ import { CircleX } from '@vicons/tabler'
         if(hasTask.value) {
           timeOut.value = setTimeout(() => {
             getTask()
-          }, 15000)
+          }, 60000)
         }
       })
   }
