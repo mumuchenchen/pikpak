@@ -92,7 +92,7 @@
     <n-modal v-model:show="showAddUrl">
       <n-card style="width: 600px;" title="添加链接或新建文件夹">
         <template #header-extra>
-          <n-icon @click="showAddUrl = false">
+          <n-icon class="icon-close" @click="showAddUrl = false">
             <circle-x></circle-x>
           </n-icon>
         </template>
@@ -122,7 +122,7 @@
         </div>
       </n-card>
     </n-modal>
-    
+
     <n-modal v-model:show="showImage">
       <n-card style="width: 100vw; height: 100vh;" :title="fileInfo ? fileInfo.name : '图片'">
         <template #header-extra>
@@ -135,7 +135,7 @@
         </div>
       </n-card>
     </n-modal>
-    
+
     <n-modal v-model:show="showName">
       <n-card style="width: 600px;" title="修改名称">
         <template #header-extra>
@@ -191,7 +191,7 @@
         </n-form>
       </n-card>
     </n-modal>
-    
+
     <n-modal v-model:show="showCopy">
       <n-card style="width: 600px;" title="复制链接">
         <template #header-extra>
@@ -424,7 +424,7 @@ import axios from 'axios';
                 case 'base':
                   window.localStorage.setItem('pikpakUploadFolder', JSON.stringify(row))
                   break
-                case 'delete': 
+                case 'delete':
                   dialog.warning({
                       title: '警告',
                       content: '确定删除' + row.name  + '？',
@@ -891,7 +891,7 @@ import axios from 'axios';
       }
     }
   }
-  
+
   const batchMoveAll = (items:object) => {
     let text:string[] = []
     filesList.value.forEach((item:FileInfo) => {
@@ -1172,7 +1172,7 @@ import axios from 'axios';
   }
 </script>
 
-<style>
+<style v-scope>
 
 .header {
   height: 40px;
@@ -1192,6 +1192,7 @@ import axios from 'axios';
 }
 .header .action {
   font-size: 24px;
+  cursor: pointer;
 }
 .n-data-table-td {
   cursor: pointer;
@@ -1293,6 +1294,13 @@ import axios from 'axios';
 .tool-icon {
   font-size: 18px;
 }
+
+.icon-close {
+  font-size: 24px;
+  color: #F56C6C;
+  cursor: pointer;
+}
+
 @keyframes move-down {
   0% {
     bottom: 52px;

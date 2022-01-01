@@ -30,7 +30,7 @@ app.use(router)
 app.use(cnzzAnalytics, {
   router: router,
   siteIdList: [
-    1280510106,
+    1280659658,
   ],
 });
 app.mount('#app')
