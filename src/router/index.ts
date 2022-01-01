@@ -40,6 +40,11 @@ const routes: Array<RouteRecordRaw> = [
         name: 'setting',
         component: () => import('../views/setting.vue')
       },
+      {
+        path: 'invited',
+        name: 'invited',
+        component: () => import('../views/invited.vue')
+      },
       // {
       //   path: 'share',
       //   name: 'share',
