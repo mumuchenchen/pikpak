@@ -683,7 +683,7 @@ const addUrl = () => {
         postData = {
           kind: "drive#file",
           name: "",
-          parent_id: route.params.id || '',
+          parent_id: route.params.id[route.params.id.length - 1] || '',
           upload_type: "UPLOAD_TYPE_URL",
           url: {
             url: url
@@ -695,7 +695,7 @@ const addUrl = () => {
         hasHash = true
         postData = {
           "kind": "drive#folder",
-          "parent_id": route.params.id || '',
+          "parent_id": route.params.id[route.params.id.length - 1] || '',
           "name": url
         }
       }
