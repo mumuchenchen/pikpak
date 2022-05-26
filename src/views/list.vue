@@ -741,7 +741,7 @@ const deleteFile = (id: string | string[]) => {
 const showCopyFail = ref(false)
 const copyValue = ref('')
 const openInIINA = (value: string) => {
-  window.open('iina://open?url=' + encodeURIComponent(value), '_target')
+  window.open('iina://open?url=' + encodeURIComponent(value), '_self')
 }
 const copy = (value: string) => {
   nextTick(() => {
