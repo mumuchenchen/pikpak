@@ -211,7 +211,7 @@
               <n-input-group>
                 <n-input :value="item.link.url"></n-input>
                 <n-button type="primary" @click="copy(item.link.url)">复制</n-button>
-                <n-button type="primary" @click="window.open('iina://open?url=' + encodeURIComponent(item.link.url))">IINA播放</n-button>
+                <n-button type="primary" @click="window.open('iina://open?url=' + encodeURIComponent(item.link.url), '_blank')">IINA播放</n-button>
               </n-input-group>
             </n-form-item>
           </template>
