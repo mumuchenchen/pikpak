@@ -211,7 +211,7 @@
               <n-input-group>
                 <n-input :value="item.link.url"></n-input>
                 <n-button type="primary" @click="copy(item.link.url)">复制</n-button>
-                <n-button  style="margin-left: 10px" type="primary" @click="window.open('iina://open?url=' + encodeURIComponent(item.link.url), '_blank')">IINA播放</n-button>
+                <n-button  style="margin-left: 10px" type="primary" @click="openInIINA(item.link.url)">IINA播放</n-button>
               </n-input-group>
             </n-form-item>
           </template>
@@ -740,6 +740,9 @@ const deleteFile = (id: string | string[]) => {
 }
 const showCopyFail = ref(false)
 const copyValue = ref('')
+const openInIINA = (value: string) => {
+  window.open('iina://open?url=' + encodeURIComponent(value), '_target')
+}
 const copy = (value: string) => {
   nextTick(() => {
     const fakeElement = document.createElement('button')
