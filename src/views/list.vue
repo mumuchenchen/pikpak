@@ -199,7 +199,7 @@
     </n-modal>
 
     <n-modal v-model:show="showCopy">
-      <n-card style="width: 600px;" title="复制链接">
+      <n-card style="width: 700px;" title="复制链接">
         <template #header-extra>
           <n-icon @click="showCopy = false">
             <circle-x></circle-x>
@@ -211,7 +211,7 @@
               <n-input-group>
                 <n-input :value="item.link.url"></n-input>
                 <n-button type="primary" @click="copy(item.link.url)">复制</n-button>
-                <n-button  style="margin-left: 10px" type="primary" @click="openInIINA(item.link.url)">IINA播放</n-button>
+                <n-button type="primary" @click="openInIINA(item.link.url)">IINA播放</n-button>
               </n-input-group>
             </n-form-item>
           </template>
@@ -219,6 +219,7 @@
             <n-input-group>
               <n-input :value="fileInfo?.web_content_link"></n-input>
               <n-button type="primary" @click="copy(fileInfo.web_content_link)">复制</n-button>
+              <n-button type="primary" @click="openInIINA(fileInfo.web_content_link)">IINA播放</n-button>
             </n-input-group>
           </n-form-item>
         </n-form>
