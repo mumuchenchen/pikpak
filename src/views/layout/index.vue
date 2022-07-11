@@ -27,14 +27,6 @@
           :color="vipInfo?.status === 'ok' ? '#d1ae6a' : undefined"
           processing>
         </n-progress>
-        <p style="margin-bottom: 0;">
-          <n-tooltip :width="600" placement="right">
-              <template #trigger>
-                <a style="color: #306eff;" target="_blank" href="https://k.youshop10.com/JGDtoxg6">2021年12月23日~2021年12月31日￥119购体验会员VIP年卡</a>
-              </template>
-              2021年12月23日~2021年12月31日 【1年PikPak体验会员仅售：119元！原价450元】 2022年1月1日起： 1年PikPak体验会员仅售：169元！原价450元】 -每人只能购买使用一次，官方代理商分销，感谢支持
-          </n-tooltip>
-        </p>
       </div>
       <div class="sider-bottom" v-if="!collapsed" :class="{vip: vipInfo?.status === 'ok'}">
         <div class="bottom-user-info">
